@@ -2,16 +2,17 @@ import 'package:flutter/material.dart';
 import 'package:tasky_app/features/Auth/view/screen/login_screen.dart';
 
 class HaveAccount extends StatelessWidget {
-  const HaveAccount({super.key,required this.rout, required this.textbutton});
+  const HaveAccount({super.key,required this.rout, required this.textbutton, required this.title});
 final Widget rout;
 final String textbutton;
+final String title;
   @override
   Widget build(BuildContext context) {
     return Row(
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
                           Text(
-                            "Already have an account? ",
+                           title,
                             style: TextStyle(color: Colors.grey,
                             
                               fontSize: 16,

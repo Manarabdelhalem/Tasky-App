@@ -2,6 +2,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:tasky_app/core/constant/app_icon.dart';
+import 'package:tasky_app/features/Auth/services/firebase_auth.dart';
 import 'package:tasky_app/features/Auth/view/screen/forget_password.dart';
 import 'package:tasky_app/features/Auth/view/screen/register_screen.dart';
 import 'package:tasky_app/features/Auth/view/widget/elevated_widget.dart';
@@ -23,6 +24,49 @@ class _LoginScreenState extends State<LoginScreen> {
   final TextEditingController passwordController = TextEditingController();
 
   final formKey = GlobalKey<FormState>();
+bool isLoading = false; // 1. حالة التحميل
+
+  @override
+  void dispose() {
+    // 2. تنظيف الذاكرة
+    emailController.dispose();
+    passwordController.dispose();
+    super.dispose();
+  }
+
+  Future<void> _login() async {
+    if (formKey.currentState!.validate()) {
+      setState(() => isLoading = true);
+
+      try {
+        String? result = await FirebaseAuthAuthentication.signInWithEmail(
+          email: emailController.text.trim(),
+          password: passwordController.text.trim(),
+        );
+
+        if (!mounted) return;
+
+        if (result == "Success") {
+          // الدخول بنجاح
+          Navigator.pushReplacement(
+            context,
+            MaterialPageRoute(builder: (context) => const HomeScreen()),
+          );
+        } else {
+          // عرض رسالة الخطأ (سواء خطأ في البيانات أو أن الإيميل غير مفعل)
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text(result ?? "حدث خطأ ما"),
+              backgroundColor: Colors.orange, // لون مميز للتنبيه
+            ),
+          );
+        }
+      } finally {
+        if (mounted) setState(() => isLoading = false);
+      }
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -117,15 +161,10 @@ class _LoginScreenState extends State<LoginScreen> {
                         ),
                       ),
                       const SizedBox(height: 24),
-                      ElevatedWidget(onPressed: (){
-                        if (formKey.currentState!.validate()) {
-                            Navigator.pushReplacement(
-                              context,
-                              MaterialPageRoute(
-                                  builder: (builder) => const HomeScreen()),
-                            );
-                          }
-                      }, title: "Login"),
+                      ElevatedWidget(
+            onPressed: isLoading ? null : _login, // تعطيل الزر أثناء التحميل
+            title: isLoading ? "Logging in..." : "Login",
+          ),
                       const SizedBox(height: 32),
                   OrContinueWith()    ,
                       const SizedBox(height: 22),
@@ -134,7 +173,7 @@ class _LoginScreenState extends State<LoginScreen> {
                       ),
                       const SizedBox(height: 24),
                       HaveAccount(
-                          rout: RegisterScreen(), textbutton: "Register"),
+                          rout: RegisterScreen(), textbutton: "Register", title: "Don't have an account?",),
                     ],
                   ),
                 ),

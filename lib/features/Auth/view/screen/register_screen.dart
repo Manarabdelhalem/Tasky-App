@@ -3,6 +3,8 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:tasky_app/core/constant/app_icon.dart';
+import 'package:tasky_app/features/Auth/model/user_model.dart';
+import 'package:tasky_app/features/Auth/services/fire_base_store.dart';
 import 'package:tasky_app/features/Auth/services/firebase_auth.dart';
 import 'package:tasky_app/features/Auth/view/screen/login_screen.dart';
 import 'package:tasky_app/features/Auth/view/widget/elevated_widget.dart';
@@ -26,18 +28,66 @@ class _RegisterScreenState extends State<RegisterScreen> {
   final TextEditingController confirmController = TextEditingController();
 
   final formKey = GlobalKey<FormState>();
+  bool isLoading = false;
+
+  @override
+  void dispose() {
+    // 2. تنظيف الذاكرة (Best Practice)
+    userNameController.dispose();
+    emailController.dispose();
+    passwordController.dispose();
+    confirmController.dispose();
+    super.dispose();
+  }
+
+  Future<void> _signUp() async {
+    if (formKey.currentState!.validate()) {
+      setState(() => isLoading = true); // بدء التحميل
+
+      try {
+        String? result = await FirebaseAuthAuthentication.createUserWithEmail(
+          email: emailController.text.trim(),
+          password: passwordController.text.trim(),
+        );
+
+        // 3. التحقق من أن الشاشة ما زالت مفتوحة قبل استخدام الـ Context
+        if (!mounted) return;
+
+        if (result == "Success") {
+          UserModel newUser = UserModel(
+            userName: userNameController.text.trim(),
+            email: emailController.text.trim(),
+            password: passwordController.text.trim(),
+            userId: FirebaseAuthAuthentication.getCurrentUser()!.uid,
+          );
+
+          await FireBaseStore.SaveUserToFireStore(user: newUser);
+
+          if (mounted) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              const SnackBar(content: Text("Registration successful! we send verification email"), backgroundColor: Colors.green),
+            );
+            // الانتقال للهوم بعد النجاح
+            Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) => const LoginScreen()));
+          }
+        } else {
+          // إظهار رسالة الخطأ القادمة من Firebase
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text(result ?? "An error occurred"), backgroundColor: Colors.red),
+          );
+        }
+      } finally {
+        // إيقاف التحميل سواء نجحت العملية أو فشلت
+        if (mounted) setState(() => isLoading = false);
+      }
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Color(0xff5F33E1),
-      body: StreamBuilder(
-        stream: FirebaseAuth.instance.authStateChanges(),
-        builder: (context, snapShot) {
-          if(snapShot.hasData){
-            return HomeScreen();
-          }
-          else{
-          return Stack(
+      body: Stack(
             children: [
               SafeArea(
                 child: Form(
@@ -124,31 +174,13 @@ class _RegisterScreenState extends State<RegisterScreen> {
           
                           const SizedBox(height: 32),
           
-          ElevatedWidget(
-  title: 'Register',
-  onPressed: () async {
-    if (formKey.currentState!.validate()) {
-      // 1. Show a loading indicator if you have one
-      
-      // 2. Call the Firebase method
-      String? result = await FirebaseAuthAuthentication.createUserWithEmail(
-      email:   emailController.text.trim(),
-      password:   passwordController.text.trim(),
-      );
 
-      if (result == "Success") {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text("Registration successful!"),)
-        );
-      } else {
-        // 3. Show error message
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(result ?? "An error occurred")),
-        );
-      }
-    }
-  },
-),
+
+ElevatedWidget(
+            title: isLoading ? 'Please wait...' : 'Register',
+            // تعطيل الضغط إذا كان هناك عملية تحميل جارية
+            onPressed: isLoading ? null : _signUp, 
+          ),
           
                           const SizedBox(height: 32),
                           OrContinueWith(),
@@ -158,7 +190,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                           ,
           
                           const SizedBox(height: 32),
-          HaveAccount(rout: LoginScreen(), textbutton: "Login")
+          HaveAccount(rout: LoginScreen(), textbutton: "Login", title: "Already have an account?",)
                           ,
                         ],
                       ),
@@ -167,10 +199,10 @@ class _RegisterScreenState extends State<RegisterScreen> {
                 ),
               ),
             ],
-          );}
-        }
-      ),
+          )
     );
   }
 }
+
+
 

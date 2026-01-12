@@ -1,6 +1,7 @@
 import 'package:device_preview/device_preview.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
+import 'package:tasky_app/features/Auth/view/screen/auth_gate.dart';
 import 'package:tasky_app/features/splash/splash_screen.dart';
 import 'package:tasky_app/firebase_options.dart';
 
@@ -35,25 +36,28 @@ void main() async {
   print("--- runApp executed ---");
 }
 
-// class MyApp extends StatelessWidget {
-//   const MyApp({super.key});
-
-//   @override
-//   Widget build(BuildContext context) {
-//     return MaterialApp(
-//       home: SplashScreen(),
-//     );
-//   }
-// }
 class MyApp extends StatelessWidget {
   const MyApp({super.key});
 
   @override
   Widget build(BuildContext context) {
-    return const MaterialApp(
-      home: Scaffold(
-        body: Center(child: Text("Hello World! I am working")),
-      ),
+    return MaterialApp(
+     // home: SplashScreen(),
+     home: AuthGate(),
     );
   }
 }
+
+// class MyApp extends StatelessWidget {
+//   const MyApp({super.key});
+
+//   @override
+//   Widget build(BuildContext context) {
+//     return const MaterialApp(
+//       home: Scaffold(
+//         backgroundColor: Colors.blue,
+//         body: Center(child: Text("Hello World! I am working")),
+//       ),
+//     );
+//   }
+// }
