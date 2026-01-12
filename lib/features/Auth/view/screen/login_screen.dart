@@ -50,7 +50,7 @@ bool isLoading = false; // 1. حالة التحميل
           // الدخول بنجاح
           Navigator.pushReplacement(
             context,
-            MaterialPageRoute(builder: (context) => const HomeScreen()),
+            MaterialPageRoute(builder: (context) =>  HomeScreen()),
           );
         } else {
           // عرض رسالة الخطأ (سواء خطأ في البيانات أو أن الإيميل غير مفعل)

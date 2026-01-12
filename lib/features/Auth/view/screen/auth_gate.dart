@@ -38,7 +38,7 @@ class AuthGate extends StatelessWidget {
         // 2. إذا وجد مستخدم، نتحقق هل فعل الإيميل أم لا
         User user = snapshot.data!;
         if (user.emailVerified) {
-          return const HomeScreen(); // مفعل -> اذهب للهوم
+          return  HomeScreen(); // مفعل -> اذهب للهوم
         } else {
           return OnboardingScreen();
           // ScaffoldMessenger.of(context).showSnackBar(
