@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:tasky_app/core/constant/app_image.dart';
+import 'package:tasky_app/features/Auth/view/screen/login_screen.dart';
+import 'package:tasky_app/features/Auth/view/screen/register_screen.dart';
 import 'package:tasky_app/features/Home/home_screen.dart';
 import 'package:tasky_app/features/onboarding/model/onboarding_model.dart';
 import 'package:tasky_app/features/onboarding/view/widget/onboard_widget.dart';
@@ -49,7 +51,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                   onPressed: () {
                     Navigator.pushReplacement(
             context, 
-            MaterialPageRoute(builder: (context) => const HomeScreen()),
+            MaterialPageRoute(builder: (context) => const LoginScreen()),
                     );
                   },
                   child: const Text("Skip", style: TextStyle(color: Colors.grey)),
@@ -72,7 +74,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                      
             Navigator.pushReplacement(
               context, 
-              MaterialPageRoute(builder: (context) => const HomeScreen()),
+              MaterialPageRoute(builder: (context) => const LoginScreen()),
             );
                     }
                   },
