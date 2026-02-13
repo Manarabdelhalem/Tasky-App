@@ -1,16 +1,13 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:tasky_app/features/Auth/model/user_model.dart';
+import 'package:tasky_app/features/Auth/services/fire_base_store.dart';
 
 class FirebaseAuthAuthentication {
  
   static final FirebaseAuth _auth = FirebaseAuth.instance;
 
   static User? getCurrentUser() => _auth.currentUser;
-
-
-
-
 
   static Future<String?> createUserWithEmail({required String email, required String password}) async {
     try {
@@ -21,7 +18,7 @@ class FirebaseAuthAuthentication {
       await _auth.currentUser!.sendEmailVerification();
       return "Success";
     } on FirebaseAuthException catch (e) {
-      return e.message; // Returns the specific error (e.g., "email already in use")
+      return e.message; 
     } catch (e) {
       return e.toString();
     }
@@ -33,12 +30,12 @@ class FirebaseAuthAuthentication {
       password: password,
     );
 
-    // تحديث بيانات المستخدم للتأكد من حالة التفعيل
+
     await userCredential.user?.reload();
     User? user = _auth.currentUser;
 
     if (user != null && !user.emailVerified) {
-      return "الرجاء تفعيل حسابك من خلال الرابط المرسل إلى بريدك الإلكتروني.";
+      return "Please verify your email before logging in by clicking the link sent to your inbox.";
     }
 
     return "Success";
@@ -52,20 +49,45 @@ class FirebaseAuthAuthentication {
 static Future<void> signOut () async {
   await _auth.signOut();
 }
-// Future<UserCredential> signInWithGoogle() async {
-//   // Trigger the authentication flow
-//   final GoogleSignInAccount? googleUser = await GoogleSignIn().signIn();
 
-//   // Obtain the auth details from the request
-//   final GoogleSignInAuthentication? googleAuth = await googleUser?.authentication;
 
-//   // Create a new credential
-//   final credential = GoogleAuthProvider.credential(
-//     accessToken: googleAuth?.accessToken,
-//     idToken: googleAuth?.idToken,
-//   );
+static Future<String?> signInWithGoogle() async {
+  try {
+    final GoogleSignInAccount? googleUser = await GoogleSignIn().signIn();
+    if (googleUser == null) return "Cancelled";
 
-//   // Once signed in, return the UserCredential
-//   return await FirebaseAuth.instance.signInWithCredential(credential);
-// }
+    final GoogleSignInAuthentication googleAuth = await googleUser.authentication;
+    final credential = GoogleAuthProvider.credential(
+      accessToken: googleAuth.accessToken,
+      idToken: googleAuth.idToken,
+    );
+
+   
+    UserCredential userCredential = await _auth.signInWithCredential(credential);
+    User? user = userCredential.user;
+
+    if (user != null) {
+     
+      bool userExists = await FireBaseStore.checkUserExists(user.uid);
+
+      if (!userExists) {
+        
+        UserModel newUser = UserModel(
+          userName: user.displayName ?? "User ${user.uid.substring(0, 5)}",
+          email: user.email ?? "",
+          password: "", 
+          userId: user.uid,
+        );
+        
+      
+        await FireBaseStore.SaveUserToFireStore(user: newUser);
+      }
+    }
+
+    return "Success";
+  } catch (e) {
+    return e.toString();
+  }
+}
+static void register({required String password,required String userName}){}
 }

@@ -2,28 +2,14 @@ import 'package:device_preview/device_preview.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:tasky_app/features/Auth/view/screen/auth_gate.dart';
+import 'package:tasky_app/features/Home/view/home_screen.dart';
 import 'package:tasky_app/features/splash/splash_screen.dart';
 import 'package:tasky_app/firebase_options.dart';
 
-// void main()async {
-//   WidgetsFlutterBinding.ensureInitialized();
-//   await Firebase.initializeApp(
-//     options: DefaultFirebaseOptions.currentPlatform,
-// );
-//   runApp(  DevicePreview(
-//       enabled: false,
-//       tools: const [
-//         ...DevicePreview.defaultTools,
-      
-//       ],
-//       builder: (context) => const MyApp(),
-//     ),
-//   );
-// }
 void main() async {
-  print("--- App Starting ---");
+
   WidgetsFlutterBinding.ensureInitialized();
-  print("--- Binding Initialized ---");
+ 
   
   try {
     await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
@@ -32,8 +18,15 @@ void main() async {
     print("--- Firebase Error: $e ---");
   }
 
-  runApp(const MyApp());
-  print("--- runApp executed ---");
+  runApp(
+    DevicePreview(
+      enabled: true, // Set to true to enable device preview
+      tools: const [
+        ...DevicePreview.defaultTools,
+      ],
+      builder: (context) => const MyApp(),
+    ),
+  );
 }
 
 class MyApp extends StatelessWidget {
@@ -43,7 +36,8 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
      // home: SplashScreen(),
-     home: AuthGate(),
+    // home: AuthGate(),
+    home: HomeScreen(),
     );
   }
 }

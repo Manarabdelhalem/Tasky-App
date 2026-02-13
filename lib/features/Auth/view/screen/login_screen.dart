@@ -2,6 +2,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:tasky_app/core/constant/app_icon.dart';
+import 'package:tasky_app/core/utils/auth_validator.dart';
 import 'package:tasky_app/features/Auth/services/firebase_auth.dart';
 import 'package:tasky_app/features/Auth/view/screen/forget_password.dart';
 import 'package:tasky_app/features/Auth/view/screen/register_screen.dart';
@@ -10,7 +11,7 @@ import 'package:tasky_app/features/Auth/view/widget/google_button.dart';
 import 'package:tasky_app/features/Auth/view/widget/have_account.dart';
 import 'package:tasky_app/features/Auth/view/widget/or_continue_with.dart';
 import 'package:tasky_app/features/Auth/view/widget/text_form_widget.dart';
-import 'package:tasky_app/features/Home/home_screen.dart';
+import 'package:tasky_app/features/Home/view/home_screen.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -24,11 +25,11 @@ class _LoginScreenState extends State<LoginScreen> {
   final TextEditingController passwordController = TextEditingController();
 
   final formKey = GlobalKey<FormState>();
-bool isLoading = false; // 1. حالة التحميل
+bool isLoading = false; 
 
   @override
   void dispose() {
-    // 2. تنظيف الذاكرة
+   
     emailController.dispose();
     passwordController.dispose();
     super.dispose();
@@ -47,17 +48,17 @@ bool isLoading = false; // 1. حالة التحميل
         if (!mounted) return;
 
         if (result == "Success") {
-          // الدخول بنجاح
+        
           Navigator.pushReplacement(
             context,
-            MaterialPageRoute(builder: (context) => const HomeScreen()),
+            MaterialPageRoute(builder: (context) =>  HomeScreen()),
           );
         } else {
-          // عرض رسالة الخطأ (سواء خطأ في البيانات أو أن الإيميل غير مفعل)
+          
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
-              content: Text(result ?? "حدث خطأ ما"),
-              backgroundColor: Colors.orange, // لون مميز للتنبيه
+              content: Text(result ??"An unknown error occurred"),
+              backgroundColor: Colors.orange, 
             ),
           );
         }
@@ -82,7 +83,7 @@ bool isLoading = false; // 1. حالة التحميل
                   "Sign In",
                   style: TextStyle(
                     color: Colors.white,
-                    fontSize: 40, // تغيير حجم الخط
+                    fontSize: 40, 
                     fontWeight: FontWeight.bold,
                   ),
                 ),
@@ -126,16 +127,15 @@ bool isLoading = false; // 1. حالة التحميل
                             TextFormFieldWidget(
                               hintText: "Email Address",
                               userNameController: emailController,
-                              validator: (value) =>
-                                  value!.isEmpty ? "Required" : null,
+                              validator: Validator.validateEmail,
                               prefixIcon: Icons.email_outlined,
                             ),
                             const SizedBox(height: 16),
                             TextFormFieldWidget(
                               hintText: "Password",
                               userNameController: passwordController,
-                              validator: (value) =>
-                                  value!.isEmpty ? "Required" : null,
+                              validator: Validator.validatePassword,
+                                 
                               prefixIcon: Icons.lock_outline,
                             ),
                           ],
@@ -162,7 +162,7 @@ bool isLoading = false; // 1. حالة التحميل
                       ),
                       const SizedBox(height: 24),
                       ElevatedWidget(
-            onPressed: isLoading ? null : _login, // تعطيل الزر أثناء التحميل
+            onPressed: isLoading ? null : _login, 
             title: isLoading ? "Logging in..." : "Login",
           ),
                       const SizedBox(height: 32),

@@ -4,4 +4,5 @@ class AppImage {
   static String onboarding1="asset/image/first-inboard.png";
   static String onboarding2="asset/image/second_inboard.png"; 
   static String onboarding3="asset/image/third_inboard.png"; 
+  static String homeImage="asset/image/undraw_push-notifications_5z1s 1.png"; 
 }

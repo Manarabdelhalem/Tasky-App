@@ -15,6 +15,7 @@ class TextFormFieldWidget extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return TextFormField(
+     // obscureText: true,
       validator: validator,
       controller: userNameController,
       decoration: InputDecoration(
@@ -25,6 +26,14 @@ class TextFormFieldWidget extends StatelessWidget {
          contentPadding: const EdgeInsets.symmetric(
           vertical: 12,
           horizontal: 20,
+        ),
+        focusedBorder: OutlineInputBorder(
+          borderSide: BorderSide(color: Colors.blue, width: 2),
+          borderRadius: BorderRadius.circular(30),
+        ),
+        errorBorder: OutlineInputBorder(
+          borderSide: BorderSide(color: Colors.red, width: 2),
+          borderRadius: BorderRadius.circular(30),
         ),
       ),
     );

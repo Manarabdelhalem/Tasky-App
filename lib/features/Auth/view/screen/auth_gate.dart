@@ -1,7 +1,7 @@
 // ملف جديد مثلاً باسم auth_gate.dart
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import 'package:tasky_app/features/Home/home_screen.dart';
+import 'package:tasky_app/features/Home/view/home_screen.dart';
 import 'package:tasky_app/features/onboarding/view/screen/onboarding_screen.dart';
 
 // class AuthGate extends StatelessWidget {
@@ -30,21 +30,17 @@ class AuthGate extends StatelessWidget {
     return StreamBuilder<User?>(
       stream: FirebaseAuth.instance.authStateChanges(),
       builder: (context, snapshot) {
-        // 1. إذا لم يكن هناك مستخدم مسجل
+       
         if (!snapshot.hasData) {
           return const OnboardingScreen();
         }
 
-        // 2. إذا وجد مستخدم، نتحقق هل فعل الإيميل أم لا
         User user = snapshot.data!;
         if (user.emailVerified) {
-          return const HomeScreen(); // مفعل -> اذهب للهوم
+          return  HomeScreen(); 
         } else {
           return OnboardingScreen();
-          // ScaffoldMessenger.of(context).showSnackBar(
-          //     const SnackBar(content: Text("you must verify your email first"), backgroundColor: Colors.green),
-          //   );
-         // return const VerifyEmailScreen(); // غير مفعل -> صفحة تطلب منه التفعيل
+          
         }
       },
     );

@@ -42,6 +42,8 @@ dependencies:
   pinput: ^6.0.1
   cloud_firestore: ^6.1.1
   google_sign_in: ^6.2.1
+  google_fonts: ^7.0.0
+  calendar_date_picker2: ^2.0.1
 
 dev_dependencies:
   flutter_test:
