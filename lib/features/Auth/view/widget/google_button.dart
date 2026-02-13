@@ -3,46 +3,36 @@ import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:tasky_app/core/constant/app_icon.dart';
+import 'package:tasky_app/features/Auth/services/firebase_auth.dart';
+import 'package:tasky_app/features/Home/view/home_screen.dart';
 
-class GoogleButton extends StatelessWidget {
-  GoogleButton({Key? key}) : super(key: key);
+class GoogleButton extends StatefulWidget { 
+  const GoogleButton({Key? key}) : super(key: key);
 
-  // دالة تسجيل الدخول باستخدام Google
-  Future<void> _signInWithGoogle(BuildContext context) async {
-    try {
-      // استخدام GoogleSignIn لتسجيل الدخول
-      final GoogleSignIn googleSignIn = GoogleSignIn();
+  @override
+  State<GoogleButton> createState() => _GoogleButtonState();
+}
 
-      // بدء عملية تسجيل الدخول
-      final GoogleSignInAccount? googleUser = await googleSignIn.signIn();
+class _GoogleButtonState extends State<GoogleButton> {
+  bool isLoading = false;
 
-      if (googleUser == null) {
-        // إذا انصرف المستخدم قبل إنهاء تسجيل الدخول
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text("Google Sign-In cancelled")),
-        );
-        return;
-      }
+  Future<void> _handleGoogleSignIn(BuildContext context) async {
+    setState(() => isLoading = true); 
 
-      // احصل على تفاصيل المصادقة من Google
-      final GoogleSignInAuthentication googleAuth = await googleUser.authentication;
+    String? result = await FirebaseAuthAuthentication.signInWithGoogle();
 
-      // إنشاء بيانات الاعتماد لـ Firebase باستخدام idToken فقط
-      final AuthCredential credential = GoogleAuthProvider.credential(
-        idToken: googleAuth.idToken,
-      );
+    if (!mounted) return;
+    setState(() => isLoading = false); 
 
-      // تسجيل الدخول باستخدام بيانات الاعتماد
-      await FirebaseAuth.instance.signInWithCredential(credential);
-
-      // عرض رسالة نجاح
+    if (result == "Success") {
+  
+       Navigator.pushReplacement(
+          context, 
+          MaterialPageRoute(builder: (context) => HomeScreen())
+       );
+    } else if (result != "Cancelled") {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text("Google Sign-In successful!")),
-      );
-    } catch (e) {
-      // عرض رسالة خطأ عند حدوث مشكلة
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text("Google Sign-In error: ${e.toString()}")),
+        SnackBar(content: Text("Error: $result")),
       );
     }
   }
@@ -50,8 +40,8 @@ class GoogleButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return ElevatedButton(
-      onPressed: () => _signInWithGoogle(context),
-      style: ElevatedButton.styleFrom(
+      onPressed: isLoading ? null : () => _handleGoogleSignIn(context),
+           style: ElevatedButton.styleFrom(
         backgroundColor: Colors.white,
         foregroundColor: Colors.grey,
         elevation: 0,
@@ -61,11 +51,13 @@ class GoogleButton extends StatelessWidget {
           borderRadius: BorderRadius.circular(12),
         ),
       ),
-      child: SvgPicture.asset(
-        AppIcon.googleIcon,
-        width: 28,
-        height: 28,
-      ),
+      child: isLoading 
+        ? const SizedBox(
+            width: 24, 
+            height: 24, 
+            child: CircularProgressIndicator(strokeWidth: 2, color: Color(0xff5F33E1))
+          )
+        : SvgPicture.asset(AppIcon.googleIcon, width: 28, height: 28),
     );
   }
 }

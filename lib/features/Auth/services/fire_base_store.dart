@@ -10,4 +10,12 @@ class FireBaseStore {
       print("Error writing to Firestore: $e");
     }
   }
+  static Future<bool> checkUserExists(String userId) async{
+    try{
+     var user =await db.collection("users").doc(userId).get();
+     return user.exists; 
+    }catch(e){
+return false;
+    }
+  }
 }
