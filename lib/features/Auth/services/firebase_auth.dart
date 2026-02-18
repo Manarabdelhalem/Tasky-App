@@ -1,48 +1,61 @@
+import 'dart:developer';
+
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:google_sign_in/google_sign_in.dart';
+import 'package:tasky_app/core/utils/shared_preference_file.dart';
 import 'package:tasky_app/features/Auth/model/user_model.dart';
 import 'package:tasky_app/features/Auth/services/fire_base_store.dart';
 
-class FirebaseAuthAuthentication {
+class FirebaseUserAuthentication {
  
   static final FirebaseAuth _auth = FirebaseAuth.instance;
 
   static User? getCurrentUser() => _auth.currentUser;
 
-  static Future<String?> createUserWithEmail({required String email, required String password}) async {
+  static Future<String?> signUpWithEmail({required String email, required String password}) async {
     try {
-      await _auth.createUserWithEmailAndPassword(
+  UserCredential userCredential = await _auth.createUserWithEmailAndPassword(
         email: email, 
         password: password,
       );
       await _auth.currentUser!.sendEmailVerification();
-      return "Success";
+      await SharedPreferenceFile.saveData("Id",_auth.currentUser!.uid);
+      //return "Success";
+      log(  "User created successfully. Verification email sent to $email");
     } on FirebaseAuthException catch (e) {
-      return e.message; 
+     // return e.message; 
+     log( "FirebaseAuthException: ${e.message}");
+     throw Exception(e.message ?? "An error occurred during registration. Please try again.");
     } catch (e) {
-      return e.toString();
+     // return e.toString();
+     log( "Exception: ${e.toString()}");
+     throw Exception("An error occurred during registration. Please try again.");
     }
   }
- static Future<String?> signInWithEmail({required String email, required String password}) async {
+static Future<void> signInWithEmail({required String email, required String password}) async {
   try {
     UserCredential userCredential = await _auth.signInWithEmailAndPassword(
       email: email,
       password: password,
     );
 
-
     await userCredential.user?.reload();
     User? user = _auth.currentUser;
 
     if (user != null && !user.emailVerified) {
-      return "Please verify your email before logging in by clicking the link sent to your inbox.";
+      
+      throw Exception("Please verify your email before logging in.");
     }
-
-    return "Success";
   } on FirebaseAuthException catch (e) {
-    return e.message;
+
+    String message = "An error occurred";
+    if (e.code == 'user-not-found') message = "No user found for that email.";
+    else if (e.code == 'wrong-password') message = "Wrong password provided.";
+    else message = e.message ?? message;
+    
+    throw Exception(message);
   } catch (e) {
-    return e.toString();
+    throw Exception("Something went wrong, please try again.");
   }
 }
 
@@ -80,7 +93,7 @@ static Future<String?> signInWithGoogle() async {
         );
         
       
-        await FireBaseStore.SaveUserToFireStore(user: newUser);
+        await FireBaseStore.saveUserToFireStore(user: newUser);
       }
     }
 

@@ -24,7 +24,7 @@ import 'package:tasky_app/features/onboarding/view/screen/onboarding_screen.dart
 
 class AuthGate extends StatelessWidget {
   const AuthGate({super.key});
-
+static const String routeName="/authGate";
   @override
   Widget build(BuildContext context) {
     return StreamBuilder<User?>(

@@ -5,19 +5,23 @@ class FlagContainer extends StatelessWidget {
     super.key,
  required this.isSelected,
   required this.index,
-  this.onTap
+  this.onTap,
+  this.width=70,
+  this.height=70
   });
 final bool isSelected;
 final int index;
 void Function()? onTap;
+final double width;
+final double height;
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
       onTap: onTap,
       child: Container(
              
-             width: 70,
-             height: 70,
+             width: width,
+             height: height,
              decoration: BoxDecoration(
                color:isSelected ? Colors.deepPurple : Colors.white,
                border: isSelected ? null : Border.all(width: 2, color: Colors.grey),
