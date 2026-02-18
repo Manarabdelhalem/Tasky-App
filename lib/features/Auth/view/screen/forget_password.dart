@@ -5,7 +5,7 @@ import 'package:tasky_app/features/Auth/view/widget/text_form_widget.dart';
 
 class ForgetPasswordScreen extends StatelessWidget {
   ForgetPasswordScreen({super.key});
-
+static const String routeName="/forgetPasswordScreen";
   final TextEditingController emailController = TextEditingController();
   final GlobalKey<FormState> formKey = GlobalKey<FormState>();
 
@@ -63,11 +63,12 @@ class ForgetPasswordScreen extends StatelessWidget {
               const SizedBox(height: 32),
               ElevatedButton(
                 onPressed: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                        builder: (builder) =>  VerifyCodeScreen()),
-                  );
+                  // Navigator.push(
+                  //   context,
+                  //   MaterialPageRoute(
+                  //       builder: (builder) =>  VerifyCodeScreen()),
+                  // );
+                  Navigator.pushReplacementNamed(context, VerifyCodeScreen.routeName);
                 },
                 style: ElevatedButton.styleFrom(
                   backgroundColor: const Color(0xff5F33E1), // خلفية الزر زرقاء

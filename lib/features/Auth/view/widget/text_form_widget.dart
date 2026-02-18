@@ -20,7 +20,7 @@ class TextFormFieldWidget extends StatelessWidget {
       controller: userNameController,
       decoration: InputDecoration(
         border: OutlineInputBorder(borderRadius: BorderRadius.circular(30)),
-        prefixIcon:Icon( prefixIcon,color: Colors.grey,),
+        prefixIcon:Icon( prefixIcon,color: Colors.deepPurple,),
         hintText: hintText,
         hintStyle: TextStyle(color: Colors.grey),
          contentPadding: const EdgeInsets.symmetric(

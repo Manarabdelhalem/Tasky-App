@@ -4,7 +4,7 @@ import 'package:pinput/pinput.dart'; // لازم تعملي import للباكي�
 
 class VerifyCodeScreen extends StatelessWidget {
   VerifyCodeScreen({super.key});
-
+static const String routeName="/verifyCodeScreen";
   // الألوان الخاصة بيكي
   final Color primaryBlue = const Color(0xff5F33E1);
   final Color textDark = const Color(0xFF101828);

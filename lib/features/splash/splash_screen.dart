@@ -6,7 +6,7 @@ import 'package:tasky_app/features/onboarding/view/screen/onboarding_screen.dart
 
 class SplashScreen extends StatefulWidget {
   const SplashScreen({super.key});
-
+  static const String routeName="/splashScreen";
   @override
   State<SplashScreen> createState() => _SplashScreenState();
 }
@@ -17,7 +17,12 @@ class _SplashScreenState extends State<SplashScreen> {
   
     super.initState();
     Future.delayed(Duration(seconds: 3),(){
-      Navigator.pushReplacement(context, MaterialPageRoute(builder: (builder)=>OnboardingScreen()));
+     
+      // Navigator.pushReplacement(
+      //   context, 
+      //   MaterialPageRoute(builder: (context) => const OnboardingScreen()),
+      // );
+      Navigator.pushReplacementNamed(context, OnboardingScreen.routeName);
     });
   }
   @override

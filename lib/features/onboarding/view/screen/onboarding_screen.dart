@@ -8,7 +8,7 @@ import 'package:tasky_app/features/onboarding/view/widget/onboard_widget.dart';
 
 class OnboardingScreen extends StatefulWidget {
   const OnboardingScreen({super.key});
-
+static const String routeName="/onboardingScreen";
   @override
   State<OnboardingScreen> createState() => _OnboardingScreenState();
 }
@@ -49,10 +49,11 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
               
                 TextButton( 
                   onPressed: () {
-                    Navigator.pushReplacement(
-            context, 
-            MaterialPageRoute(builder: (context) => const LoginScreen()),
-                    );
+            //         Navigator.pushReplacement(
+            // context, 
+            // MaterialPageRoute(builder: (context) => const LoginScreen()),
+            //         );
+            Navigator.pushReplacementNamed(context, LoginScreen.routeName);
                   },
                   child: const Text("Skip", style: TextStyle(color: Colors.grey)),
                 ),
@@ -72,10 +73,11 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
             );
                     } else {
                      
-            Navigator.pushReplacement(
-              context, 
-              MaterialPageRoute(builder: (context) => const LoginScreen()),
-            );
+            // Navigator.pushReplacement(
+            //   context, 
+            //   MaterialPageRoute(builder: (context) => const LoginScreen()),
+            // );
+            Navigator.pushReplacementNamed(context, LoginScreen.routeName);
                     }
                   },
                   child: Text(currentIndex == onboardingPages.length - 1 ? "Get Started" : "Next"),

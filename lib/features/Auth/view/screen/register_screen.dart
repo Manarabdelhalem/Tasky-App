@@ -1,8 +1,9 @@
 
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_svg/flutter_svg.dart';
-import 'package:tasky_app/core/constant/app_icon.dart';
+
+import 'package:tasky_app/core/utils/app_dialog.dart';
 import 'package:tasky_app/core/utils/auth_validator.dart';
 import 'package:tasky_app/features/Auth/model/user_model.dart';
 import 'package:tasky_app/features/Auth/services/fire_base_store.dart';
@@ -17,7 +18,7 @@ import 'package:tasky_app/features/Home/view/home_screen.dart';
 
 class RegisterScreen extends StatefulWidget {
   const RegisterScreen({super.key});
-
+static const String routeName="/registerScreen";
   @override
   State<RegisterScreen> createState() => _RegisterScreenState();
 }
@@ -41,49 +42,33 @@ class _RegisterScreenState extends State<RegisterScreen> {
     super.dispose();
   }
 
-  Future<void> _signUp() async {
-    if (formKey.currentState!.validate()) {
-      setState(() => isLoading = true); 
+Future<void> _signUp ()async{
+if(formKey.currentState!.validate()){
+  setState(() {
+    isLoading=true;
+  });
+}
+try{
+String? user=await FirebaseUserAuthentication.signUpWithEmail(
+  email: emailController.text.trim(),
+ password: passwordController.text.trim());
 
-      try {
-        String? result = await FirebaseAuthAuthentication.createUserWithEmail(
-          email: emailController.text.trim(),
-          password: passwordController.text.trim(),
-        );
 
-    
-        if (!mounted) return;
-
-        if (result == "Success") {
-          UserModel newUser = UserModel(
-            userName: userNameController.text.trim(),
-            email: emailController.text.trim(),
-            password: passwordController.text.trim(),
-            userId: FirebaseAuthAuthentication.getCurrentUser()!.uid,
-          );
-
-          await FireBaseStore.SaveUserToFireStore(user: newUser);
-
-          if (mounted) {
-            ScaffoldMessenger.of(context).showSnackBar(
-              const SnackBar(content: Text("Registration successful! we send verification email"), backgroundColor: Colors.green),
-            );
-
-            Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) => const LoginScreen()));
-          }
-        } else {
-          
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text(result ?? "An error occurred"), backgroundColor: Colors.red),
-          );
-        }
-      } finally {
-
-        if (mounted) setState(() => isLoading = false);
-      }
-    }
+UserModel  userData=UserModel(
+  userId: FirebaseUserAuthentication.getCurrentUser()!.uid,
+   userName: userNameController.text.trim(),
+    email: emailController.text.trim(),
+     password: passwordController.text.trim());
+     await FireBaseStore.saveUserToFireStore(user: userData);
+if(mounted){
+AppDialog.showVerifyDialog(context);
+}
+}catch(e){
+  AppDialog.showErrorDialog(context, e.toString());
+}finally {
+    if (mounted) setState(() => isLoading = false);
   }
-
+}
   @override
   Widget build(BuildContext context) {
     return Scaffold(

@@ -19,7 +19,7 @@ class _GoogleButtonState extends State<GoogleButton> {
   Future<void> _handleGoogleSignIn(BuildContext context) async {
     setState(() => isLoading = true); 
 
-    String? result = await FirebaseAuthAuthentication.signInWithGoogle();
+    String? result = await FirebaseUserAuthentication.signInWithGoogle();
 
     if (!mounted) return;
     setState(() => isLoading = false); 

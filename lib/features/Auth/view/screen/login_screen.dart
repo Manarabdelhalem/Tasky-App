@@ -2,6 +2,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:tasky_app/core/constant/app_icon.dart';
+import 'package:tasky_app/core/utils/app_dialog.dart';
 import 'package:tasky_app/core/utils/auth_validator.dart';
 import 'package:tasky_app/features/Auth/services/firebase_auth.dart';
 import 'package:tasky_app/features/Auth/view/screen/forget_password.dart';
@@ -15,7 +16,7 @@ import 'package:tasky_app/features/Home/view/home_screen.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
-
+static const String routeName="/loginScreen";
   @override
   State<LoginScreen> createState() => _LoginScreenState();
 }
@@ -35,38 +36,35 @@ bool isLoading = false;
     super.dispose();
   }
 
-  Future<void> _login() async {
-    if (formKey.currentState!.validate()) {
-      setState(() => isLoading = true);
+ Future<void> _login() async {
+  if (!formKey.currentState!.validate()) return;
 
-      try {
-        String? result = await FirebaseAuthAuthentication.signInWithEmail(
-          email: emailController.text.trim(),
-          password: passwordController.text.trim(),
-        );
+  setState(() => isLoading = true);
 
-        if (!mounted) return;
+  try {
+   
+    await FirebaseUserAuthentication.signInWithEmail(
+      email: emailController.text.trim(),
+      password: passwordController.text.trim(),
+    );
 
-        if (result == "Success") {
-        
-          Navigator.pushReplacement(
-            context,
-            MaterialPageRoute(builder: (context) =>  HomeScreen()),
-          );
-        } else {
-          
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Text(result ??"An unknown error occurred"),
-              backgroundColor: Colors.orange, 
-            ),
-          );
-        }
-      } finally {
-        if (mounted) setState(() => isLoading = false);
-      }
-    }
+    
+    if (!mounted) return;
+    // Navigator.pushReplacement(
+    //   context,
+    //   MaterialPageRoute(builder: (context) =>  HomeScreen()),
+    // );
+    Navigator.pushReplacementNamed(context, HomeScreen.routeName);
+    
+  } catch (e) {
+   
+    if (!mounted) return;
+   AppDialog.showErrorDialog(context, e.toString());
+  } finally {
+
+    if (mounted) setState(() => isLoading = false);
   }
+}
 
   @override
   Widget build(BuildContext context) {
@@ -145,11 +143,13 @@ bool isLoading = false;
                       Align(
                         alignment: Alignment.centerRight,
                         child: GestureDetector(
-                          onTap: () => Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                  builder: (builder) =>
-                                       ForgetPasswordScreen())),
+                          // onTap: () => Navigator.push(
+                          //     context,
+                          //     // MaterialPageRoute(
+                          //     //     builder: (builder) =>
+                          //     //          ForgetPasswordScreen())
+                          //     ),
+                          onTap: () => Navigator.pushNamed(context, ForgetPasswordScreen.routeName),
                           child: const Text(
                             "Forgot Password?",
                             style: TextStyle(

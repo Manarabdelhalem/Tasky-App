@@ -4,7 +4,8 @@ import 'package:tasky_app/features/Home/widget/flag_container.dart';
 import 'package:tasky_app/features/Home/widget/material_button_widget.dart';
 
 class FlagWindow extends StatefulWidget {
-   FlagWindow({super.key});
+   FlagWindow({super.key,required this.onFlagSelected});
+   void Function(int)? onFlagSelected;
 
   @override
   State<FlagWindow> createState() => _FlagWindowState();
@@ -57,7 +58,8 @@ Row(
              SizedBox(width: 10,),
         Expanded(
           child: MaterialButtonWidget(text: "Save", onPressed: (){
-           // Navigator.pop(context);
+           widget.onFlagSelected!(selectedFlagIndex);
+           Navigator.pop(context);
           },  
           // bgColor: Colors.deepPurple,
           // textColor: Colors.white
