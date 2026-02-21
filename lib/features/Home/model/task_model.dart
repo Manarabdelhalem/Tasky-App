@@ -15,13 +15,13 @@ class TaskModel {
     required this.date,
   });
 
-   Map<String, dynamic> toJson(TaskModel task){
-  return {
-    "id":task.id,
-    "title":task.title,
-    "description":task.description,
-    "priority":task.priority,
-    "date":task.date.millisecondsSinceEpoch,
+   Map<String, dynamic> toJson(){
+  return <String, dynamic> {
+    "id":id,
+    "title":title,
+    "description":description,
+    "priority":priority,
+    "date":date.millisecondsSinceEpoch,
   };
 }
 
