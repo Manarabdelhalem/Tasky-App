@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:tasky_app/core/utils/app_dialog.dart';
 import 'package:tasky_app/features/Auth/services/fire_base_store.dart';
 import 'package:tasky_app/features/Home/model/task_model.dart';
+import 'package:tasky_app/features/Home/view/home_screen.dart';
 
 class UpdateTaskScreen extends StatefulWidget {
   const UpdateTaskScreen({super.key,required this.task});
@@ -18,7 +19,7 @@ class _UpdateTaskScreenState extends State<UpdateTaskScreen> {
     return Scaffold(
       appBar: AppBar(
        leading: IconButton(onPressed: (){
-        Navigator.pop(context);
+        Navigator.pop(context, true);
        }, icon: Icon(Icons.cancel,size: 30, color: Colors.red,)),
        
       ),
@@ -57,7 +58,7 @@ class _UpdateTaskScreenState extends State<UpdateTaskScreen> {
                   IconButton(
                     onPressed: (){},
                    icon: Icon(Icons.flag_outlined, color: Colors.deepPurple)),
-                  Text("Task Pririty : ",style: TextStyle(fontSize: 18),),
+                  Text("Task Priority : ${widget.task.priority}",style: TextStyle(fontSize: 18),),
                   Spacer(),
                  MaterialButton(
                   color: Colors.grey[300],
@@ -70,13 +71,14 @@ class _UpdateTaskScreenState extends State<UpdateTaskScreen> {
                 mainAxisAlignment: MainAxisAlignment.start,
                 children: [
                   IconButton(
-                    onPressed: (){
+                    onPressed: ()async{
                       AppDialog.showDialogLoading( context);
-FireBaseStore.deleteTask(widget.task.id).then((_){
+ await FireBaseStore.deleteTask(widget.task.id).then((_){
   Navigator.pop(context);
-  Navigator.pop(context);
+  Navigator.pop(context, true);
+
 }).catchError((e){
-  AppDialog.showErrorDialog(context, e);
+  AppDialog.showErrorDialog(context, e.toString());
 });
 
 
@@ -103,7 +105,15 @@ FireBaseStore.deleteTask(widget.task.id).then((_){
       bottomNavigationBar: Padding(
         padding: const EdgeInsets.all(30.0),
         child: MaterialButton(
-                  onPressed: (){}, 
+                  onPressed: (){
+                    AppDialog.showDialogLoading( context);
+                    FireBaseStore.updateTask(widget.task).then((_){
+                      Navigator.pop(context);
+                      Navigator.pop(context, true);
+                    }).catchError((e){
+                      AppDialog.showErrorDialog(context, e.toString());
+                    });
+                  }, 
                   color: Colors.deepPurple,
                   child: Text("Edit Task", style: TextStyle(color: Colors.white,fontSize: 18),),
                   minWidth: double.infinity,

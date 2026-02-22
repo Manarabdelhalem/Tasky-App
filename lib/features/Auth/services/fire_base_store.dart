@@ -38,24 +38,7 @@ static CollectionReference<TaskModel> collectionTasks(){
     fromFirestore: (snapShot,options)=>TaskModel.fromJson(snapShot.data()!),
      toFirestore: (value,options)=>value.toJson());
 }
-// Future<void> addTask({
-//   required String title,
-//   required String description,
-//   required int priority,
 
-// })async{
-  
-//  final taskReference=collectionTasks().doc();
-//   var userId=taskReference.id;
-//  TaskModel userTask=TaskModel(
-//     id: userId,
-//     title: title,
-//     description: description,
-//     priority: priority,
-//     date: DateTime.now(),
-//   );
-//   taskReference.set(  userTask);
-// }
 
 static Future<void> addTask({required TaskModel task})async{
   await collectionTasks().doc(task.id).set(task);
@@ -66,14 +49,52 @@ static Future<void>  updateTask(TaskModel task)async{
   static Future<void> deleteTask(String taskId)async{
     await collectionTasks().doc(taskId).delete();
 }
+// في FireBaseStore
 
-static Future<List<TaskModel>> getAllTasks()async{
+static Stream<List<TaskModel>> getAllTasks() {
+  return collectionTasks()
+     // .where("isCompeleted", isEqualTo: false)
+      .snapshots()  // ← ده اللي بيعمل Stream حقيقي
+      .map((querySnapshot) {
+        return querySnapshot.docs.map((doc) => doc.data()).toList();
+      });
+}
+
+static Stream<List<TaskModel>> getAllCompletedTasks() {
+  return collectionTasks()
+      .where("isCompeleted", isEqualTo: true)
+      .snapshots()
+      .map((querySnapshot) {
+        return querySnapshot.docs.map((doc) => doc.data()).toList();
+      });
+}
+
+// static Future<List<TaskModel>> getAllTasksNotCompeleted()async{
 
   
-var listOfTasks=await collectionTasks().get();
-return listOfTasks.docs.map((snapshot){
-return snapshot.data();
-}).toList();
+// var listOfTasks=await collectionTasks().where("isCompeleted", isEqualTo: false).get();
+// return listOfTasks.docs.map((snapshot){
+// return snapshot.data();
+// }).toList();
+// }
+
+//   static Future<List<TaskModel>> getAllCompletedTasks()async{
+
+// var querySnapShot=await collectionTasks().where("isCompeleted", isEqualTo: true)
+// .get();
+
+// return querySnapShot.docs.map((snapShot){
+  
+//   return snapShot.data();
+  
+// }).toList();
+
+
+
+// }
+
+static  Future<void> changeTaskStatus(String taskId,bool isDone)async{
+await collectionTasks().doc(taskId).update({"isCompeleted" : isDone});
 }
 
 }
