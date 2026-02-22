@@ -1,19 +1,19 @@
 import 'dart:developer';
-
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:tasky_app/core/constant/app_image.dart';
+
 import 'package:tasky_app/core/utils/app_dialog.dart';
 import 'package:tasky_app/features/Auth/services/fire_base_store.dart';
 import 'package:tasky_app/features/Auth/services/firebase_auth.dart';
 import 'package:tasky_app/features/Auth/view/widget/text_form_widget.dart';
 import 'package:tasky_app/features/Home/model/task_model.dart';
+import 'package:tasky_app/features/Home/view/empty_home_screen.dart';
 import 'package:tasky_app/features/Home/view/update_task_screen.dart';
-import 'package:tasky_app/features/Home/widget/calendar_widget.dart';
+import 'package:tasky_app/features/Home/widget/compelet_widget.dart';
 import 'package:tasky_app/features/Home/widget/flag.dart';
-import 'package:tasky_app/features/Home/widget/flag_container.dart';
+
 import 'package:tasky_app/features/Home/widget/show_bottom_sheet.dart';
+import 'package:tasky_app/features/Home/widget/task_container.dart';
 
 class HomeScreen extends StatefulWidget {
  const  HomeScreen({super.key});
@@ -29,17 +29,15 @@ class _HomeScreenState extends State<HomeScreen> {
    int priority=0;
 
 DateTime selectedDate=DateTime.now();
+bool isCompeleted=false;
 
 TextEditingController titleController=TextEditingController();
 
 TextEditingController descriptionController=TextEditingController();
 List<TaskModel> tasksList=[];
+
 @override
-  void initState() {
-    // TODO: implement initState
-    super.initState();
-    getTasks();
-  }
+ 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -61,85 +59,117 @@ List<TaskModel> tasksList=[];
           ]
         )),
       ),
-      body:Padding(
-        padding: const EdgeInsets.all(12.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            TextFormFieldWidget(hintText: "Search for your task...",
-             userNameController: TextEditingController(), 
-             validator: null, prefixIcon: Icons.search,),
-              SizedBox(height: 20,),
-            Container(
-              margin: EdgeInsets.all(16),
-              padding: EdgeInsets.symmetric(horizontal: 10, vertical: 8),
-              decoration: BoxDecoration(
-                border: Border.all(color: Colors.black),
-                borderRadius: BorderRadius.circular(8)
-              ),
-              child: Row(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Text("Today", style: GoogleFonts.inter(fontSize: 14, fontWeight: FontWeight.w600),),
-                  Icon(Icons.keyboard_arrow_down, color: Colors.grey,),
-                ],
-              ),
-            )
-       , Expanded(
-         child: ListView.separated(
-          itemCount:tasksList.length ,
-          itemBuilder: (context, index){
-         return  GestureDetector(
-           onTap: (){
-           // Navigator.pushNamed(context, UpdateTaskScreen.routeName, arguments: tasksList[index]);
-           Navigator.push(context, MaterialPageRoute(builder: (context)=> UpdateTaskScreen(task: tasksList[index],)));
-           },
-           child: Container(
-              padding: EdgeInsets.symmetric(horizontal: 5, vertical: 8),
-               decoration: BoxDecoration(
-                    border: Border.all(color: Colors.black),
-                    borderRadius: BorderRadius.circular(12)
+body: StreamBuilder<List<TaskModel>>(
+  stream: FireBaseStore.getAllTasks(), 
+  builder: (context, snapshot) {
+    
+    if (snapshot.connectionState == ConnectionState.waiting) {
+      // AppDialog.showDialogLoading(context);
+       return Center(child: CircularProgressIndicator());
+    }
+    if (snapshot.hasError) {
+     // AppDialog.showErrorDialog(context, snapshot.error.toString());
+       return Center(child: Text("Something went wrong!"));
+    }
+
+    
+    final allTasks = snapshot.data ?? [];
+    final tasksList = allTasks.where((t) => !t.isCompeleted).toList();
+    final completedTasksList = allTasks.where((t) => t.isCompeleted).toList();
+
+    return Padding(
+      padding: const EdgeInsets.all(12.0),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          // Search Bar
+          tasksList.isEmpty
+              ? SizedBox(height: 10)
+              : TextFormFieldWidget(
+                  hintText: "Search for your task...",
+                  userNameController: TextEditingController(),
+                  validator: null,
+                  prefixIcon: Icons.search,
+                ),
+          SizedBox(height: 20),
+          CompeletWidget(title: "Today"),
+          SizedBox(height: 10),
+
+          Expanded(
+            flex: 1,
+            child: tasksList.isEmpty
+                ? EmptyHomeScreen()
+                : ListView.separated(
+                    itemCount: tasksList.length,
+                    separatorBuilder: (_, __) => SizedBox(height: 12),
+                    itemBuilder: (context, index) {
+                      return TaskContainer(
+                        tasksList: tasksList,
+                        index: index,
+                        isCompleted: tasksList[index].isCompeleted,
+                        onChanged: (value) async {
+                          await FireBaseStore.changeTaskStatus(
+                              tasksList[index].id, value!);
+                      
+                        },
+                        onTap: () async {
+                          await Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (_) =>
+                                  UpdateTaskScreen(task: tasksList[index]),
+                            ),
+                          );
+                       
+                        },
+                      );
+                    },
                   ),
-              child: Row(
-                children: [
-            
-            Radio(value:  true, ),
-            SizedBox(width: 10,),
-            Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(tasksList[index].title,style: TextStyle(fontSize: 18, fontWeight: FontWeight.w400),),
-                Text("Today ${tasksList[index].date.day}/${tasksList[index].date.month}/${tasksList[index].date.year}", style: TextStyle(fontSize: 14, color: Colors.grey),)
-              ],
-            ),
-            Spacer(),
-                Container(
-                  padding: EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                  decoration: BoxDecoration(
-                    border: Border.all(color: Colors.grey),
-                    borderRadius: BorderRadius.circular(6)
-                  ),
-                  child: Row(
-                    children: [
-                      Icon(Icons.flag_outlined, color: Colors.deepPurple, size: 19,),
-                      SizedBox(width: 4,),
-                      Text(tasksList[index].priority.toString(), style: TextStyle(color: Colors.black),)
-                    ],
-                  ),
-                )
-                ],
-              ),
-            ),
-         );
-         }, separatorBuilder: (BuildContext context, int index) { 
-          return SizedBox(height: 12,);
-         },
-         ),
-       )
+          ),
+
+          SizedBox(height: 16),
+
         
+          if (completedTasksList.isNotEmpty) ...[
+            Divider(thickness: 1.5),
+            SizedBox(height: 8),
+            CompeletWidget(title: "Completed"),
+            SizedBox(height: 10),
+            Expanded(
+              flex: 1,
+              child: ListView.separated(
+                itemCount: completedTasksList.length,
+                separatorBuilder: (_, __) => SizedBox(height: 12),
+                itemBuilder: (context, index) {
+                  return TaskContainer(
+                    tasksList: completedTasksList,
+                    index: index,
+                    isCompleted: completedTasksList[index].isCompeleted,
+                    onChanged: (value) async {
+                      await FireBaseStore.changeTaskStatus(
+                          completedTasksList[index].id, value!);
+                    },
+                    onTap: () async {
+                      await Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (_) => UpdateTaskScreen(
+                              task: completedTasksList[index]),
+                        ),
+                      );
+                    },
+                  );
+                },
+              ),
+            ),
           ],
-        ),
-      ) ,
+        ],
+      ),
+    );
+  },
+),
+      
+  
       floatingActionButton: FloatingActionButton(
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(30)
@@ -186,7 +216,7 @@ ontapSend: () async{
       selectedDate=DateTime.now();
         Navigator.pop(context);
         Navigator.pop(context);
-        getTasks();
+       
     });
 
 
@@ -204,11 +234,4 @@ ontapSend: () async{
       ),
     );
   }
- Future<void> getTasks()async{
-  final  fetchData= await FireBaseStore.getAllTasks();
-setState(() {
-  tasksList=fetchData;
-  
-});
-  }
-}
+ }
